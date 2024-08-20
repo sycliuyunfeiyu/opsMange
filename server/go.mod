@@ -1,6 +1,6 @@
 module github.com/flipped-aurora/gin-vue-admin/server
 
-go 1.22
+go 1.20
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
@@ -16,6 +16,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/google/uuid v1.3.0
 	github.com/gookit/color v1.5.4
 	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.21.8+incompatible
 	github.com/jordan-wright/email v0.0.0-20200824153738-3f5bafa1cd84
@@ -85,7 +86,6 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

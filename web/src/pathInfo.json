@@ -1,5 +1,9 @@
 {
   "/src/view/about/index.vue": "About",
+  "/src/view/consul/consulData/consulData.vue": "ConsulData",
+  "/src/view/consul/consulData/consulDataForm.vue": "ConsulDataForm",
+  "/src/view/consul/consulGroup/consulGroup.vue": "ConsulGroup",
+  "/src/view/consul/consulGroup/consulGroupForm.vue": "ConsulGroupForm",
   "/src/view/error/index.vue": "Error",
   "/src/view/error/reload.vue": "Reload",
   "/src/view/example/breakpoint/breakpoint.vue": "BreakPoint",
