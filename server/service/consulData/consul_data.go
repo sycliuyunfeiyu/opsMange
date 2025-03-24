@@ -15,6 +15,10 @@ func (consulDService *ConsulDataService) CreateConsulData(consulD *consulData.Co
 	err = global.GVA_DB.Create(consulD).Error
 	return err
 }
+func (consulDService *ConsulDataService) CreateBatchConsulData(consulD *[]consulData.ConsulData) (err error) {
+	err = global.GVA_DB.Create(consulD).Error
+	return err
+}
 
 // DeleteConsulData 删除consulData表记录
 // Author [piexlmax](https://github.com/piexlmax)

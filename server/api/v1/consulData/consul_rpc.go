@@ -2,6 +2,7 @@ package consulData
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/consulData"
@@ -49,18 +50,31 @@ func (CRA *ConsulRpcApi) DeRegisterConsul(c *gin.Context) {
 }
 
 func (CRA *ConsulRpcApi) BatchRegisterConsul(c *gin.Context) {
+	//data, _ := ioutil.ReadAll(c.Request.Body)
+	//fmt.Println(string("-----------"))
+	//
+	//fmt.Println(string(data))
+
 	var consulDataModelList []consulData.ConsulData
 	var consulDataModelErr []map[string]string
-	consulDataModelIds := map[string][]consulData.ConsulData{"ids": consulDataModelList}
-	_ = c.ShouldBindJSON(&consulDataModelIds)
+	//consulDataModelIds := map[string][]consulData.ConsulData{"ids": consulDataModelList}
 
-	consulDataModelList = consulDataModelIds["ids"]
+	err := c.ShouldBindJSON(&consulDataModelList)
+
+	fmt.Println(consulDataModelList)
+	if err != nil {
+		errStr := "下线失败!解析数据出现问题" + string(err.Error())
+		global.GVA_LOG.Error(errStr)
+		response.FailWithMessage(errStr, c)
+	}
+	//consulDataModelList = consulDataModelIds["ids"]
 	for _, consulDataModel := range consulDataModelList {
 		err := consulRpcService.ConsulRegister(consulDataModel)
 		if err != nil {
 			consulDataModelErr = append(consulDataModelErr, map[string]string{consulDataModel.ConsulId: err.Error()})
 		}
 	}
+
 	if errListLen := len(consulDataModelErr); errListLen > 0 {
 		errS, _ := json.Marshal(consulDataModelErr)
 		errStr := "注册失败!" + string(errS)
@@ -76,8 +90,12 @@ func (CRA *ConsulRpcApi) BatchDeRegisterConsul(c *gin.Context) {
 	var consulDataModelList []consulData.ConsulData
 	var consulDataModelErr []map[string]string
 	consulDataModelIds := map[string][]consulData.ConsulData{"ids": consulDataModelList}
-	_ = c.ShouldBindJSON(&consulDataModelIds)
-
+	err := c.ShouldBindJSON(&consulDataModelIds)
+	if err != nil {
+		errStr := "下线失败!解析数据出现问题" + string(err.Error())
+		global.GVA_LOG.Error(errStr)
+		response.FailWithMessage(errStr, c)
+	}
 	consulDataModelList = consulDataModelIds["ids"]
 	for _, consulDataModel := range consulDataModelList {
 		err := consulRpcService.ConsulDeRegister(consulDataModel)
@@ -87,11 +105,11 @@ func (CRA *ConsulRpcApi) BatchDeRegisterConsul(c *gin.Context) {
 	}
 	if errListLen := len(consulDataModelErr); errListLen > 0 {
 		errS, _ := json.Marshal(consulDataModelErr)
-		errStr := "注册失败!" + string(errS)
+		errStr := "下线失败!" + string(errS)
 		global.GVA_LOG.Error(errStr)
 		response.FailWithMessage(errStr, c)
 	} else {
-		response.OkWithMessage("注册成功", c)
+		response.OkWithMessage("下线成功", c)
 	}
 
 }

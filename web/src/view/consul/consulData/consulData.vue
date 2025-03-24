@@ -65,8 +65,10 @@
     </div>
     <div class="gva-table-box">
         <div class="gva-btn-list">
-            <el-button type="primary" icon="plus" @click="openDialog">新增</el-button>
-            <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">删除</el-button>
+          <el-button type="primary" icon="plus" @click="openDialog">新增</el-button>
+          <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">删除</el-button>
+          <el-button type="primary" icon="plus" @click="openBatchDialog">批量新增</el-button>
+          <el-button icon="primary" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="batchRegister">批量注册</el-button>
         </div>
         <el-table
         ref="multipleTable"
@@ -245,7 +247,11 @@ import {
   deleteConsulDataByIds,
   updateConsulData,
   findConsulData,
-  getConsulDataList, registerConsulData, deregisterConsulData
+  getConsulDataList,
+  registerConsulData,
+  deregisterConsulData,
+  createBatchConsulData,
+  registerConsulDataByItems
 } from '@/api/consulData/consulData'
 
 // 全量引入格式化工具 请按需保留
@@ -283,14 +289,14 @@ const formData = ref({
         serviceTags: '',
         serviceToken: '',
         })
-  const dataSource = ref([])
-  const getDataSourceFunc = async()=>{
-    const res = await getConsulDataDataSource()
-    if (res.code === 0) {
-      dataSource.value = res.data
-    }
+const dataSource = ref([])
+const getDataSourceFunc = async()=>{
+  const res = await getConsulDataDataSource()
+  if (res.code === 0) {
+    dataSource.value = res.data
   }
-  getDataSourceFunc()
+}
+getDataSourceFunc()
 const service_status = [{
   value: '0',
   label: '未注册'
@@ -382,11 +388,9 @@ const elFormRef = ref()
 const elSearchFormRef = ref()
 
 
-var groupUuid = {}
 
 const updateFromData  = async (val) => {
   const groupUuidData = await findConsulGroupUuid({groupUuid :formData.value.groupUuid})
-  console.log(groupUuidData)
   // groupUuid = groupUuidData.data
 
 
@@ -430,17 +434,17 @@ const handleCurrentChange = (val) => {
   page.value = val
   getTableData()
 }
-const getGroupData = async() => {
-  const groupData = await getConsulGroupList()
-  // updateFromData(groupData)
-  if (groupData.code === 0) {
-    for (var i = 0; i < groupData.data.list.length; i++) {
-      groupUuid[groupData.data.list[i].groupUuid] = groupData.data.list[i]
-    }
-  }
-
-  console.log('======groupUuid=======')
-}
+// const getGroupData = async() => {
+//   const groupData = await getConsulGroupList()
+//   // updateFromData(groupData)
+//   if (groupData.code === 0) {
+//     for (var i = 0; i < groupData.data.list.length; i++) {
+//       groupUuid[groupData.data.list[i].groupUuid] = groupData.data.list[i]
+//     }
+//   }
+//
+//   console.log('======groupUuid=======')
+// }
 
 
 // 查询
@@ -517,6 +521,33 @@ const onDelete = async() => {
       }
       })
     }
+//
+const batchRegister = async() => {
+
+    const IDs = []
+    if (multipleSelection.value.length === 0) {
+      ElMessage({
+        type: 'warning',
+        message: '请选择要注册的数据'
+      })
+      return
+    }
+    multipleSelection.value &&
+    multipleSelection.value.map(item => {
+      IDs.push(item)
+    })
+    const res = await registerConsulDataByItems(IDs)
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '注册成功'
+      })
+      // if (tableData.value.length === IDs.length && page.value > 1) {
+      //   page.value--
+      // }
+      getTableData()
+    }
+}
 
 // 行为控制标记（弹窗内部需要增还是改）
 const type = ref('')
@@ -534,11 +565,17 @@ const updateConsulDataFunc = async(row) => {
 }
 // 注册行
 const registerConsulDataFunc = async(row) => {
-  const res = await findConsulData({ ID: row.ID })
-  type.value = 'register'
+  const res = await findConsulData({ID: row.ID})
   if (res.code === 0) {
     formData.value = res.data
-    dialogFormVisible.value = true
+    const req = await registerConsulData(formData.value)
+    if (req.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '注册成功'
+      })
+      getTableData()
+    }
   }
 }
 
@@ -548,8 +585,17 @@ const deregisterConsulDataFunc = async(row) => {
   type.value = 'deregister'
   if (res.code === 0) {
     formData.value = res.data
-    dialogFormVisible.value = true
+    const req = await deregisterConsulData(formData.value)
+    if (req.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '下线成功'
+      })
+      getTableData()
+    }
   }
+
+
 }
 
 // 删除行
@@ -575,7 +621,11 @@ const openDialog = () => {
     type.value = 'create'
     dialogFormVisible.value = true
 }
-
+// 打开弹窗
+const openBatchDialog = () => {
+  type.value = 'batchcreate'
+  dialogFormVisible.value = true
+}
 // 关闭弹窗
 const closeDialog = () => {
     dialogFormVisible.value = false
@@ -601,6 +651,8 @@ const closeDialog = () => {
         serviceToken: '',
         }
 }
+// const listarr = ref([])
+
 // 弹窗确定
 const enterDialog = async () => {
      elFormRef.value?.validate( async (valid) => {
@@ -613,11 +665,39 @@ const enterDialog = async () => {
                 case 'update':
                   res = await updateConsulData(formData.value)
                   break
-                case 'register':
-                  res = await registerConsulData(formData.value)
-                  break
-                case 'deregister':
-                  res = await deregisterConsulData(formData.value)
+
+                case 'batchcreate':
+                  var arr = formData.value.serviceAddress.split(",");
+                  var listarr =[]
+                  for (var i=0;i<arr.length;i++)
+                  {
+                    var dataone = {}
+                    // dataone.consulId =formData.value.consulId
+                    dataone.consulName =formData.value.consulName
+                    dataone.consulStatus = formData.value.consulStatus
+                    dataone.consulUrl = formData.value.consulUrl
+                    dataone.consulUuid = formData.value.consulUuid
+                    dataone.groupUuid = formData.value.groupUuid
+                    dataone.remake = formData.value.remake
+                    dataone.serviceChecks = formData.value.serviceChecks
+                    dataone.serviceConnect = formData.value.serviceConnect
+                    dataone.serviceEnableTagOverride = formData.value.serviceEnableTagOverride
+                    dataone.serviceKind = formData.value.serviceKind
+                    dataone.serviceMeta = formData.value.serviceMeta
+                    dataone.serviceProxy = formData.value.serviceProxy
+                    dataone.serviceSocketPath = formData.value.serviceSocketPath
+                    dataone.serviceTaggedAdds = formData.value.serviceTaggedAdds
+                    dataone.serviceTags = formData.value.serviceTags
+                    dataone.serviceToken = formData.value.serviceToken
+
+                    dataone.serviceAddress = arr[i].split(":")[0]
+                    dataone.consulId = arr[i].split(":")[0]
+                    dataone.servicePort = parseInt(arr[i].split(":")[1])
+
+                    listarr[i] = dataone
+
+                  }
+                  res = await createBatchConsulData(listarr)
                   break
                 default:
                   res = await createConsulData(formData.value)

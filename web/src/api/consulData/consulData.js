@@ -16,6 +16,13 @@ export const createConsulData = (data) => {
   })
 }
 
+export const createBatchConsulData = (data) => {
+  return service({
+    url: '/consulD/createBatchConsulData',
+    method: 'post',
+    data
+  })
+}
 // @Tags ConsulData
 // @Summary 删除consulData表
 // @Security ApiKeyAuth
@@ -140,3 +147,10 @@ export const deregisterConsulData = (data) => {
   })
 }
 
+// export const deregisterBatchConsulData = (params) => {
+//   return service({
+//     url: '/consulRpc/batchRegisterConsulData',
+//     method: 'post',
+//     params
+//   })
+// }

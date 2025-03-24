@@ -1,6 +1,7 @@
 package consulData
 
 import (
+	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/consulData"
@@ -33,6 +34,32 @@ func (consulDApi *ConsulDataApi) CreateConsulData(c *gin.Context) {
 	}
 	consulD.CreatedBy = utils.GetUserID(c)
 	err = consulDService.CreateConsulData(&consulD)
+	if err != nil {
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败", c)
+		return
+	}
+	response.OkWithMessage("创建成功", c)
+}
+func (consulDApi *ConsulDataApi) CreateBatchConsulData(c *gin.Context) {
+	//data, _ := ioutil.ReadAll(c.Request.Body)
+	//fmt.Println(string(data))
+
+	var consulDList []consulData.ConsulData
+
+	err := c.ShouldBindJSON(&consulDList)
+	fmt.Print(consulDList)
+
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	for i, _ := range consulDList {
+		consulDList[i].ConsulUuid = uuid.New().String()
+	}
+
+	consulDList[0].CreatedBy = utils.GetUserID(c)
+	err = consulDService.CreateBatchConsulData(&consulDList)
 	if err != nil {
 		global.GVA_LOG.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)

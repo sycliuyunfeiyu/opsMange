@@ -113,7 +113,9 @@ func OperationRecord() gin.HandlerFunc {
 			if len(record.Resp) > bufferSize {
 				// 截断
 				record.Body = "超出记录长度"
+				record.Resp = "超出记录长度"
 			}
+
 		}
 
 		if err := operationRecordService.CreateSysOperationRecord(record); err != nil {

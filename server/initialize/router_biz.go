@@ -16,11 +16,22 @@ func initBizRouter(routers ...*gin.RouterGroup) {
 	{
 		consulGroupRouter := router.RouterGroupApp.ConsulGroup
 		consulGroupRouter.InitConsulGroupRouter(privateGroup, publicGroup)
-	} // 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
+	}
 	{
 		consulDataRouter := router.RouterGroupApp.ConsulData
 		consulDataRouter.InitConsulDataRouter(privateGroup, publicGroup)
 		consulDataRouter.InitConsulRpcRouter(privateGroup, publicGroup)
-
+	}
+	{
+		streamsetsDataRouter := router.RouterGroupApp.StreamsetsData
+		streamsetsDataRouter.InitStreamsetsDataRouter(privateGroup, publicGroup)
+	}
+	{
+		streamsetsPipelineInfoRouter := router.RouterGroupApp.StreamsetsPipelineInfo
+		streamsetsPipelineInfoRouter.InitPipelineInfoRouter(privateGroup, publicGroup)
+	}
+	{
+		k8sInfoRouter := router.RouterGroupApp.K8sInfo
+		k8sInfoRouter.InitK8sInfoRouter(privateGroup, publicGroup)
 	}
 }

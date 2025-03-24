@@ -33,7 +33,7 @@ func (crs *ConsulRpcService) ConsulRegister(consulDataModel consulData.ConsulDat
 
 		data1 := make([]map[string]string, 0)
 		err := json.Unmarshal([]byte(dataS), &data1)
-		fmt.Println(err)
+		fmt.Println("consul serve info Checks err: " + err.Error())
 		for _, data2 := range data1 {
 			dataEnd = append(dataEnd, data2)
 
